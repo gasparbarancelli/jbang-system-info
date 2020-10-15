@@ -212,8 +212,8 @@ class systemcli implements Callable<Integer> {
             }
         }
 
-        print("Tempo de atividade (horas): ", "" + TimeUnit.HOURS.convert(uptime, TimeUnit.MILLISECONDS));
-        print("Tempo de atividade (dias): ", "" + TimeUnit.DAYS.convert(uptime, TimeUnit.MILLISECONDS));
+        print("Tempo de atividade (horas) ", "" + TimeUnit.HOURS.convert(uptime, TimeUnit.MILLISECONDS));
+        print("Tempo de atividade (dias) ", "" + TimeUnit.DAYS.convert(uptime, TimeUnit.MILLISECONDS));
     }
 
     @Option(names = { "-p", "--port" }, description = "Verifica se a porta esta em uso")
