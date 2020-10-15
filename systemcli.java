@@ -1,30 +1,31 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
 //DEPS info.picocli:picocli:4.5.0
 
+import com.sun.management.OperatingSystemMXBean;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Option;
-import com.sun.management.OperatingSystemMXBean;
+
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.Callable;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
-import java.util.Locale;
-import java.lang.reflect.Method;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.Locale;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Command(name = "systemcli", mixinStandardHelpOptions = true, version = "systemcli 1.0",
-        description = "systemcli made with jbang")
+@Command(name = "systemcli", mixinStandardHelpOptions = true, version = "systemcli 1.0", description = "systemcli made with jbang")
 class systemcli implements Callable<Integer> {
 
     @Option(names = { "-all"}, description = "Exibe todas informacoes")
@@ -42,11 +43,17 @@ class systemcli implements Callable<Integer> {
     public Integer call() throws Exception {
         if (showAll) {
             systemcli object = systemcli.class.newInstance();
-            for (Method method : systemcli.class.getMethods()) {
-                if (method.getName().startsWith("show")) {
-                    method.invoke(object, true);
-                }
-            }
+            Arrays.stream(systemcli.class.getMethods())
+                    .filter(method -> method.getName().startsWith("show"))
+                    .sorted(Comparator.comparing(Method::getName))
+                    .forEach(method -> {
+                        try {
+                            Object arg = method.getName().equals("showPortInUse") ? "8080" : true;
+                            method.invoke(object, arg);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
         }
         return 0;
     }
@@ -207,6 +214,24 @@ class systemcli implements Callable<Integer> {
 
         print("Tempo de atividade (horas): ", "" + TimeUnit.HOURS.convert(uptime, TimeUnit.MILLISECONDS));
         print("Tempo de atividade (dias): ", "" + TimeUnit.DAYS.convert(uptime, TimeUnit.MILLISECONDS));
+    }
+
+    @Option(names = { "-p", "--port" }, description = "Verifica se a porta esta em uso")
+    public void showPortInUse(String port) throws Exception {
+        if (port == null) {
+            port = "8080";
+        }
+        String os = System.getProperty("os.name").toLowerCase();
+        String[] command;
+        if (os.startsWith("win")) {
+            command = new String[]{"cmd", "/c", "netstat -a -n -o | findstr " + port};
+        } else {
+            command = new String[]{"netstat -tulpn | grep :" + port};
+        }
+        Process uptimeProc =  Runtime.getRuntime().exec(command);
+        BufferedReader in = new BufferedReader(new InputStreamReader(uptimeProc.getInputStream(), StandardCharsets.UTF_8));
+        String emUso = in.readLine() == null ? "Nao" : "Sim";
+        print("Porta " + port + " esta em uso?", emUso);
     }
 
     private String longToStr(Long value) {
