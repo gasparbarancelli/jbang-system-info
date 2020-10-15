@@ -226,7 +226,7 @@ class systemcli implements Callable<Integer> {
         if (os.startsWith("win")) {
             command = new String[]{"cmd", "/c", "netstat -a -n -o | findstr " + port};
         } else {
-            command = new String[]{"netstat -tulpn | grep :" + port};
+            command = new String[]{"/bin/bash", "-c", "netstat -tulpn | grep :" + port};
         }
         Process uptimeProc =  Runtime.getRuntime().exec(command);
         BufferedReader in = new BufferedReader(new InputStreamReader(uptimeProc.getInputStream(), StandardCharsets.UTF_8));
