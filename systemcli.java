@@ -196,12 +196,12 @@ class systemcli implements Callable<Integer> {
             BufferedReader in = new BufferedReader(new InputStreamReader(uptimeProc.getInputStream()));
             String line = in.readLine();
             if (line != null) {
-                Pattern parse = Pattern.compile("((\\d+) days,)? (\\d+):(\\d+)");
+                Pattern parse = Pattern.compile("(\\d+):(\\d+):(\\d+) up (\\d+)");
                 Matcher matcher = parse.matcher(line);
                 if (matcher.find()) {
-                    String _days = matcher.group(2);
-                    String _hours = matcher.group(3);
-                    String _minutes = matcher.group(4);
+                    String _days = matcher.group(4);
+                    String _hours = matcher.group(1);
+                    String _minutes = matcher.group(2);
                     int days = _days != null ? Integer.parseInt(_days) : 0;
                     int hours = _hours != null ? Integer.parseInt(_hours) : 0;
                     int minutes = _minutes != null ? Integer.parseInt(_minutes) : 0;
