@@ -173,7 +173,7 @@ class systemcli implements Callable<Integer> {
         print("Espaco total de disco", longToStr(discoEmGb) + "GB");
     }
 
-    @Option(names = { "-u", "--uptime" }, description = "Exibe há quanto tempo seu sistema está em atividade")
+    @Option(names = { "-u", "--uptime" }, description = "Exibe ha quanto tempo seu sistema esta em atividade")
     public void showUptime(boolean show) throws Exception {
         long uptime = -1;
         String os = System.getProperty("os.name").toLowerCase();
